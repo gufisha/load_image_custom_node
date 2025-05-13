@@ -40,8 +40,8 @@ class LoadImageFromCustomFolder:
             }
         }
 
-    RETURN_TYPES = ("IMAGE", "IMAGE_PREVIEW") # Added IMAGE_PREVIEW
-    RETURN_NAMES = ("image", "preview")      # Added preview
+    RETURN_TYPES = ("IMAGE",) # Changed from ("IMAGE", "IMAGE_PREVIEW")
+    RETURN_NAMES = ("image",)      # Changed from ("image", "preview")
     FUNCTION = "load_selected_image"
     CATEGORY = "image/load"
 
@@ -64,9 +64,9 @@ class LoadImageFromCustomFolder:
         image_tensor = torch.from_numpy(img_array)[None,]
 
         # For preview, use the original (after exif transpose)
-        preview_image = ImageOps.exif_transpose(pil_image_original)
+        # preview_image = ImageOps.exif_transpose(pil_image_original) # No longer returning separate preview PIL
 
-        return (image_tensor, [preview_image]) # Return tensor and list of PIL images for preview
+        return (image_tensor,) # Return only the tensor for standard on-node preview
 
     @classmethod
     def IS_CHANGED(cls, image_file, **kwargs): # Removed folder_path, added **kwargs
