@@ -1,4 +1,5 @@
 import os
+import hashlib # Added for IS_CHANGED
 # from PIL import Image # This line should be removed or commented if not used
 from PIL import Image, ImageOps
 import numpy as np
@@ -70,8 +71,19 @@ class LoadImageFromCustomFolder:
 
     @classmethod
     def IS_CHANGED(cls, image_file, **kwargs): # Removed folder_path, added **kwargs
-        """Force UI to refresh options when folder changes.""" # Comment might be slightly outdated
-        return float("nan")
+        image_path = os.path.join(cls.DEFAULT_FOLDER_PATH, image_file)
+        try:
+            m = hashlib.sha256()
+            with open(image_path, 'rb') as f:
+                m.update(f.read())
+            return m.digest().hex()
+        except Exception as e:
+            # If the file can't be accessed or doesn't exist yet, 
+            # return a new random value to ensure it's treated as changed.
+            # This can happen if the dropdown is populated but the file is then removed
+            # or if there's a path issue.
+            print(f"[LoadImageFromCustomFolder] IS_CHANGED error for {image_path}: {e}")
+            return float("nan") 
 
     @classmethod
     def VALIDATE_INPUTS(cls, image_file, **kwargs): # Removed folder_path, added **kwargs
@@ -100,4 +112,4 @@ class LoadImageFromCustomFolder:
             }
 
 NODE_CLASS_MAPPINGS["LoadImageFromCustomFolder"] = LoadImageFromCustomFolder
-NODE_DISPLAY_NAME_MAPPINGS["LoadImageFromCustomFolder"] = "📂 Load Image from Folder"
+NODE_DISPLAY_NAME_MAPPINGS["LoadImageFromCustomFolder"] = "Load Image from Folder" # Temporarily simplified for diagnostics
